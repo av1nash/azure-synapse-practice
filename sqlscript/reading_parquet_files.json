@@ -1,0 +1,20 @@
+{
+	"name": "reading_parquet_files",
+	"properties": {
+		"folder": {
+			"name": "query_data"
+		},
+		"content": {
+			"query": "--If running in serverless sql pool, do not run on master. master db do not support creation of external data source.\n-- Step 1\nCREATE EXTERNAL DATA SOURCE YellowTaxi\nWITH ( LOCATION = 'https://azureopendatastorage.blob.core.windows.net/nyctlc/yellow/')\nGO\n\n--Step 2\nSELECT \n    YEAR(tpepPickupDateTime), \n    passengerCount, \n    COUNT(*) AS cnt \nFROM \n    OPENROWSET( \n        BULK 'puYear=2018/puMonth=*/*.snappy.parquet', \n        DATA_SOURCE = 'YellowTaxi', \n        FORMAT='PARQUET' \n    ) WITH ( \n        tpepPickupDateTime DATETIME2, \n        passengerCount INT \n    ) AS nyc \nGROUP BY \n    passengerCount, \n    YEAR(tpepPickupDateTime) \nORDER BY \n    YEAR(tpepPickupDateTime), \n    passengerCount;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dp203",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
